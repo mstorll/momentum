@@ -1,0 +1,32 @@
+version: '2'
+services:
+
+  momentum:  
+    image: dockerhub.icom24.de/mstorll/novnc:latest
+    hostname: novnc
+    container_name: momentum
+    environment:
+      # Adjust Desktop (fluxbox, lxde) default: lxde
+      RUN_DESKTOP: lxde
+      # Adjust to your screen size
+      DISPLAY_WIDTH: 1280
+      DISPLAY_HEIGHT: 800
+      # start Service
+      RUN_XTERM: no       ## default yes
+      RUN_SSH: yes        ## default yes
+      RUN_MOMENTUM: no    ## default no
+      RUN_FIREFOX: no     ## default no   
+    volumes:
+      - 'work:/opt/momentum'
+    ports:
+      - "15900:5900"
+      - "16085:8080"
+    networks:
+      - novnc
+    build: ./build
+
+volumes:
+  work:
+
+networks:
+  novnc:

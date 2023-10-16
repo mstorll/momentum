@@ -1,0 +1,1 @@
+# samba usermap file

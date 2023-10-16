@@ -1,32 +1,63 @@
 version: '2'
-services:
 
+services:
   momentum:  
     image: dockerhub.icom24.de/mstorll/novnc:latest
     hostname: novnc
     container_name: momentum
+    tty: true
+    cap_add:
+      - NET_ADMIN
     environment:
       # Adjust Desktop (fluxbox, lxde) default: lxde
       RUN_DESKTOP: lxde
       # Adjust to your screen size
-      DISPLAY_WIDTH: 1280
-      DISPLAY_HEIGHT: 800
+      #DISPLAY_WIDTH: 1600
+      #DISPLAY_HEIGHT: 1200
+      #
       # start Service
-      RUN_XTERM: no       ## default yes
-      RUN_SSH: yes        ## default yes
-      RUN_MOMENTUM: no    ## default no
-      RUN_FIREFOX: no     ## default no   
+      RUN_XTERM: no               ## default: yes
+      RUN_SSH: yes                ## default: yes
+      RUN_MOMENTUM: no            ## default: no
+      RUN_FIREFOX: no             ## default: no   
+      RUN_NGINX: yes              ## default: yes
+      RUN_SAMBA: no               ## default: no
+      RUN_VPNUNLIMIT: no          ## default: no
+      #
+      # novnx http basic auth
+      BASIC_AUTH_ENABLED: yes     ## default: yes
+      BASIC_AUTH_USER:    novnc   ## default: novnc
+      BASIC_AUTH_PASS:    novnc   ## default: novnc
+      # 
+      # vnc pass
+      VNC_PASSWORD:       novnc   ## default none
+
     volumes:
-      - 'work:/opt/momentum'
+      - './entrypoint.sh:/docker-entrypoint.sh'
+      - './supervisord.conf:/app/supervisor/supervisord.conf'
+#      - './firefox.sh:/docker-entrypoint.d/firefox.sh'
+#      - './default:/etc/nginx/sites-enabled/default'
+#      - './docker-entrypoint.d:/docker-entrypoint.d'
+#      - 'work:/opt/momentum'
+#      - './data/app:/app'
+#      - './entrypoint.sh:/tmp/entrypoint.sh'
     ports:
-      - "15900:5900"
-      - "16085:8080"
-    networks:
-      - novnc
-    build: ./build
+      - 15900:5900/tcp
+      - 16085:8080/tcp
+      - 17080:80/tcp
+      - 17443:443/tcp
+      ## samba
+      - 135:135/tcp
+      - 137:137/udp
+      - 138:138/udp 
+      - 139:139/tcp
+      - 445:445/tcp
+    build: 
+      context: ./build
 
 volumes:
   work:
+  conf:
 
 networks:
   novnc:

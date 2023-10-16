@@ -32,7 +32,8 @@ services:
       # vnc pass
       VNC_PASSWORD:       novnc   ## default none
 
-#    volumes:
+    volumes:
+       - './x11vnc.conf:/app/supervisor/conf.d/x11vnc.conf'
 #      - './entrypoint.sh:/docker-entrypoint.sh'
 #      - './conf.d:/app/supervisor/conf.d'
 #      - './supervisord.conf:/app/supervisor/upervisord.conf'

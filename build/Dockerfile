@@ -224,7 +224,8 @@ RUN set -ex ; \
 
 ## atleast
 ##------------------------------------------------------------------------------
-RUN DEBIAN_FRONTEND=noninteractive apt --fix-broken install -y && updatedb
+RUN DEBIAN_FRONTEND=noninteractive apt --fix-broken install -y && \
+  DEBIAN_FRONTEND=noninteractive apt-get clean --dry-run updatedb
 
 CMD ["/docker-entrypoint.sh"]
 VOLUME ["/opt/mediaserver/data","/opt/momentum","/app","/docker-entrypoint.d"]

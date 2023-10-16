@@ -15,7 +15,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 COPY /app/ /app/
 COPY /docker-entrypoint.d/ /docker-entrypoint.d/
 RUN set -ex; \
-  DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y wget shc gcc lolcat figlet ; \
+  DEBIAN_FRONTEND=noninteractive apt-get clean --dry-run && apt-get update && apt-get install -y wget shc gcc lolcat figlet ; \
   if [ ${BUILD_SAMBA:-0} -eq 0 ] ; then \
     rm -rf /app/samba/ ; \
     rm -f /app/supervisor/conf.d/samba* /docker-entrypoint.d/samba* ; \
@@ -74,6 +74,7 @@ RUN set -ex; \
   mv /app/entrypoint.sh /docker-entrypoint.sh ; \
   mkdir -p /docker-entrypoint.d/ ; \
   mv /app/copr.sh.x /usr/local/bin/copr && mv /app/copr.txt /etc/copr.txt && rm -f /app/copr* ; \
+  DEBIAN_FRONTEND=noninteractive apt-get clean --dry-run && \
   DEBIAN_FRONTEND=noninteractive apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
@@ -82,6 +83,7 @@ RUN set -ex; \
   echo "alias cat='lolcat'" >> /etc/skel/.bash_aliases ; \
   echo "alias ll='ls -lah'" >> /etc/skel/.bash_aliases ; \
   echo "alias netstat='grc netstat -lntup4'" >> /etc/skel/.bash_aliases ; \
+  echo "alias supervisorctl='/usr/bin/supervisorctl -c /app/supervisor/supervisord.conf'" >> /etc/skel/.bash_aliases ; \
   sed -i 's/#[[:blank:]]*alias/alias/g;s/#[[:blank:]]*export LS_OPTIONS/export LS_OPTIONS/g;/dircolors/s/^# eval/eval/g' /etc/skel/.bashrc ; \
   cp /etc/skel/.bash_aliases /etc/skel/.bashrc /root/ ; \
   groupadd -g 5000 mms ; \

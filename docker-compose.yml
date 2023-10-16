@@ -2,7 +2,7 @@ version: '2'
 
 services:
   momentum:  
-    image: dockerhub.icom24.de/mstorll/novnc:latest
+    image: mstorll/novnc:latest
     hostname: novnc
     container_name: momentum
     tty: true
@@ -34,7 +34,8 @@ services:
 
     volumes:
       - './entrypoint.sh:/docker-entrypoint.sh'
-      - './supervisord.conf:/app/supervisor/supervisord.conf'
+      - './conf.d:/app/supervisor/conf.d'
+#      - './supervisord.conf:/app/supervisor/upervisord.conf'
 #      - './firefox.sh:/docker-entrypoint.d/firefox.sh'
 #      - './default:/etc/nginx/sites-enabled/default'
 #      - './docker-entrypoint.d:/docker-entrypoint.d'

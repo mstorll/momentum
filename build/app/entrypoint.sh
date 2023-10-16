@@ -5,7 +5,7 @@ set_off(){
     echo -e "+ \033[33mmissing\033[0m: $1" && return 1
   [ ! -w "$1" ] && \
      echo -e "+ \033[31merror\033[0m: permission $1" && return 1
-  echo "+ autostart \033[32mOFF\033[0m: $1"
+  echo -e "+ autostart \033[32mOFF\033[0m: $1"
   sed -i 's/^autostart.*/autostart = false/g' "$1"
 }
 set_on(){  
@@ -13,7 +13,7 @@ set_on(){
     echo -e "+ \033[33mmissing\033[0m: $1" && return 1
   [ ! -w "$1" ] && \
     echo -e "+ \033[31merror\033[0m: permission $1" && return 1
-  echo "+ autostart \033[32mON\033[0m: $1"
+  echo -e "+ autostart \033[32mON\033[0m: $1"
   sed -i 's/^autostart.*/autostart = true/g' "$1"
 }
 
@@ -22,8 +22,8 @@ export CONFIG_DIR=/app/supervisor/conf.d
 [ -x /docker-entrypoint.d/00-banner.sh ] && /docker-entrypoint.d/00-banner.sh
 case "${RUN_DESKTOP:-lxde}" in
   fluxbox) echo "+ configure desktop FLUXBOX" ; RUN_FLUXBOX=yes ; RUN_LXDE=no ;;
-  lxde)    echo "+ configure desktop LXDE" ;    RUN_FLUXBOX=no ; RUN_LXDE=yes ;;
-  *)       echo "+ configure desktop LXDE" ;    RUN_FLUXBOX=no ; RUN_LXDE=yes ;;
+  lxde) echo "+ configure desktop LXDE" ; RUN_FLUXBOX=no ; RUN_LXDE=yes ;;
+  *) echo "+ configure desktop LXDE" ; RUN_FLUXBOX=no ; RUN_LXDE=yes ;;
 esac
 
 echo "+ configure supervisord services"
@@ -32,7 +32,7 @@ if [ -d "/docker-entrypoint.d/" ] ; then
     case "$f" in
       *'dummy'|*'00-banner.sh') continue ;;
     esac
-    echo '+ exec: '$f ; . "$f" || echo -e "+ \033[31mfailed\033[0m: $f"
+    . "$f" || echo -e "+ \033[31mfailed\033[0m: $f"
   done
 fi
 

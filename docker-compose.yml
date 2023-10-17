@@ -5,7 +5,6 @@ services:
     image: mstorll/novnc:latest
     hostname: novnc
     container_name: momentum
-    tty: true
     environment:
       # Adjust Desktop (fluxbox, lxde) default: lxde
       RUN_DESKTOP: lxde
@@ -31,6 +30,8 @@ services:
       VNC_PASSWORD:       novnc   ## default none
     volumes:
       - 'conf:/app'
+      - './copr:/usr/local/bin/copr'
+      #- './copr.txt:/etc/copr.txt'
     ports:
       ## vnc
       - 15900:5900/tcp

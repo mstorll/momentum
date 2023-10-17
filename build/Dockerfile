@@ -1,3 +1,5 @@
+## DOCKERFILE +++++++++++++++++++++++++++++++++++++++++++++  10/2023  ++
+
 ARG BUILD_SSH=1
 ARG BUILD_MOMENTUM=1
 ARG BUILD_VPNUNLIMIT=1
@@ -23,7 +25,7 @@ RUN set -ex; \
   printf "%-80s\n" "=" | sed s'/ /=/g' > /app/copr.txt ; \
   figlet -w 80 -c '\\ docker art //       //         mstorll         \\'  >> /app/copr.txt ; \
   printf "%-80s\n" "=" | sed s'/ /=/g' >> /app/copr.txt ; \
-  echo '#!/bin/bash\ntest -f /etc/copr.txt || exit 0\ntest -x /usr/games/lolcat && cat /etc/copr.txt | /usr/games/lolcat || cat /app/copr.txt' > /app/copr.sh ; \
+  echo '#!/bin/bash\ntest -f /etc/copr.txt || exit 0\ntest -x /usr/games/lolcat && echo -e "$(cat /etc/copr.txt)" | /usr/games/lolcat --force || echo -e "$(cat /app/copr.txt)"' > /app/copr.sh ; \
   shc -r -f /app/copr.sh ; \
   if [ ${BUILD_VPNUNLIMIT:-0} -gt 0 2>/dev/null ] ; then \
     wget "https://www.vpnunlimited.com/api/keepsolid/vpn-download?platform=linux-new" -O /app/vpn-unlimited.deb ; \
@@ -79,7 +81,7 @@ RUN set -ex; \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
     rsync procps mlocate wget curl bash git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog \
-    tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
+    menu tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
   echo "alias cat='lolcat'" >> /etc/skel/.bash_aliases ; \
   echo "alias ll='ls -lah'" >> /etc/skel/.bash_aliases ; \
   echo "alias netstat='grc netstat -lntup4'" >> /etc/skel/.bash_aliases ; \
@@ -100,7 +102,7 @@ RUN set -ex; \
   ln -s --force vnc.html /usr/share/novnc/index.html ; \
   rm -f /etc/nginx/sites-enabled/default && mv /app/nginx/000-novnc.conf /etc/nginx/sites-enabled/default ; \
   ln -s /usr/games/lolcat /usr/bin/ ; \
-  cd /app/nginx/cert ; \
+  test -d /app/nginx/cert || mkdir /app/nginx/cert ; cd /app/nginx/cert ; \
   ARGDN="/C=DE/O=VNC/OU=NoVNC/OU=Self-Signed-Certificate/CN=novnc.local" ; \
   openssl req -x509 -newkey rsa:4096 -keyout cert.key -out cert.pem -days 3650 -sha256 -nodes -subj "$ARGDN" ; \
   htpasswd -bc /app/nginx/htpasswd ${BASIC_AUTH_USER:-novnc} ${BASIC_AUTH_PASS:-novnc}

@@ -78,7 +78,7 @@ RUN set -ex; \
   DEBIAN_FRONTEND=noninteractive apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    rsync procps mlocate wget curl bash fluxbox git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog \
+    rsync procps mlocate wget curl bash git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog \
     tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
   echo "alias cat='lolcat'" >> /etc/skel/.bash_aliases ; \
   echo "alias ll='ls -lah'" >> /etc/skel/.bash_aliases ; \
@@ -122,7 +122,7 @@ RUN sed -i -e 's/# de_DE.UTF-8 UTF-8/de_DE.UTF-8 UTF-8/' /etc/locale.gen ; \
 # RUN_* for supervisor autostart
 ENV HOME=/root \
   DEBIAN_FRONTEND=noninteractive \
-  DISPLAY=:0.0 \
+  DISPLAY=:0 \
   DISPLAY_WIDTH=1600 \
   DISPLAY_HEIGHT=1200 \
   SHELL=/bin/bash \
@@ -136,7 +136,6 @@ ENV HOME=/root \
   BASIC_AUTH_PASS=novnc \
   RUN_XTERM=yes \
   RUN_DESKTOP=lxde \
-  RUN_FLUXBOX=no \
   RUN_LXDE=yes \
   RUN_NGINX=yes \
   RUN_MOMENTUM=no \

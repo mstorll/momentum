@@ -6,14 +6,12 @@ services:
     hostname: novnc
     container_name: momentum
     tty: true
-    cap_add:
-      - NET_ADMIN
     environment:
       # Adjust Desktop (fluxbox, lxde) default: lxde
       RUN_DESKTOP: lxde
       # Adjust to your screen size
-      #DISPLAY_WIDTH: 1600
-      #DISPLAY_HEIGHT: 1200
+      DISPLAY_WIDTH: 1600
+      DISPLAY_HEIGHT: 1200
       #
       # start Service
       RUN_XTERM: no               ## default: yes
@@ -31,21 +29,18 @@ services:
       # 
       # vnc pass
       VNC_PASSWORD:       novnc   ## default none
-
+      DISPLAY: ":0"
     volumes:
-       - './x11vnc.conf:/app/supervisor/conf.d/x11vnc.conf'
-#      - './entrypoint.sh:/docker-entrypoint.sh'
-#      - './conf.d:/app/supervisor/conf.d'
-#      - './supervisord.conf:/app/supervisor/upervisord.conf'
-#      - './firefox.sh:/docker-entrypoint.d/firefox.sh'
-#      - './default:/etc/nginx/sites-enabled/default'
-#      - './docker-entrypoint.d:/docker-entrypoint.d'
-#      - 'work:/opt/momentum'
+      - 'conf:/app'
+      - './conf.d:/app/supervisor/conf.d'
 #      - './data/app:/app'
 #      - './entrypoint.sh:/tmp/entrypoint.sh'
     ports:
+      ## vnc
       - 15900:5900/tcp
+      ## novnc direct
       - 16085:8080/tcp
+      ## novnc nginx
       - 17080:80/tcp
       - 17443:443/tcp
       ## samba

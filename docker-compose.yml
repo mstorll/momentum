@@ -29,12 +29,8 @@ services:
       # 
       # vnc pass
       VNC_PASSWORD:       novnc   ## default none
-      DISPLAY: ":0"
     volumes:
       - 'conf:/app'
-      - './conf.d:/app/supervisor/conf.d'
-#      - './data/app:/app'
-#      - './entrypoint.sh:/tmp/entrypoint.sh'
     ports:
       ## vnc
       - 15900:5900/tcp

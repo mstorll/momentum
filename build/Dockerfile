@@ -143,7 +143,10 @@ ENV HOME=/root \
   RUN_MOMENTUM=no \
   RUN_VPNUNLIMIT=no \
   RUN_FIREFOX=no \
-  RUN_SSH=yes
+  RUN_SSH=yes \
+  SMB_WORKGROUP=WORKGROUP \
+  SMB_NETBIOS_NAME=WSDEBIAN \
+  SMB_SERVER_STRING="Samba %v im Debian Docker Container" 
 
 # setup SSH
 RUN set -ex ; \

@@ -18,7 +18,7 @@ services:
       RUN_MOMENTUM: no              ## default: no
       RUN_FIREFOX: no               ## default: no   
       RUN_NGINX: yes                ## default: yes
-      RUN_SAMBA: no                 ## default: no
+      RUN_SAMBA: yes                 ## default: no
       RUN_VPNUNLIMIT: no            ## default: no
       #
       # novnx http basic auth
@@ -30,12 +30,12 @@ services:
       VNC_PASSWORD:       novnc     ## default none
       #
       # samba
-      SMB_WORKGROUP: WORKGROUP      ## default: WORKGROUP
-      SMB_NETBIOS_NAME: WSDEBIAN    ## default: WSDEBIAN
-      #SMB_SERVER_STRING: "samba"   ## default: "Samba %v im Debian Docker Container"
+      #SMB_WORKGROUP: WORKGROUP     ## default: WORKGROUP
+      #SMB_NETBIOS_NAME: WSDEBIAN   ## default: WSDEBIAN
+      #SMB_SERVER_STRING: "samba"   ## default: "Samba %v im Docker Container"
 
-    volumes:
-      - 'conf:/app'
+#    volumes:
+#      - 'conf:/app'
     ports:
       ## vnc
       - 15900:5900/tcp

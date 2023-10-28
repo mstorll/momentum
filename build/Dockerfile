@@ -1,4 +1,4 @@
-## DOCKERFILE +++++++++++++++++++++++++++++++++++++++++++++  10/2023  ++
+## DOCKERFILE +++++++++++++++++++++++++++++++++++++++++++++   27/10/2023
 
 ARG BUILD_SSH=1
 ARG BUILD_MOMENTUM=1
@@ -25,7 +25,7 @@ RUN set -ex; \
   printf "%-80s\n" "=" | sed s'/ /=/g' > /app/copr.txt ; \
   figlet -w 80 -c '\\ docker art //       //         mstorll         \\'  >> /app/copr.txt ; \
   printf "%-80s\n" "=" | sed s'/ /=/g' >> /app/copr.txt ; \
-  echo '#!/bin/bash\ntest -f /etc/copr.txt || exit 0\ntest -x /usr/games/lolcat && echo -e "$(cat /etc/copr.txt)" | /usr/games/lolcat --force || echo -e "$(cat /app/copr.txt)"' > /app/copr.sh ; \
+  echo '#!/bin/bash\ntest -f /etc/copr.txt || exit 0\ntest -x /usr/games/lolcat && echo -e "$(cat /etc/copr.txt)" | /usr/games/lolcat -S 58 --force || echo -e "$(cat /app/copr.txt)"' > /app/copr.sh ; \
   shc -r -f /app/copr.sh ; \
   if [ ${BUILD_VPNUNLIMIT:-0} -gt 0 2>/dev/null ] ; then \
     wget "https://www.vpnunlimited.com/api/keepsolid/vpn-download?platform=linux-new" -O /app/vpn-unlimited.deb ; \
@@ -81,7 +81,7 @@ RUN set -ex; \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
     rsync procps mlocate wget curl bash git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog \
-    menu tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
+    python2 logapp menu tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
   echo "alias cat='lolcat'" >> /etc/skel/.bash_aliases ; \
   echo "alias ll='ls -lah'" >> /etc/skel/.bash_aliases ; \
   echo "alias netstat='grc netstat -lntup4'" >> /etc/skel/.bash_aliases ; \
@@ -105,7 +105,18 @@ RUN set -ex; \
   test -d /app/nginx/cert || mkdir /app/nginx/cert ; cd /app/nginx/cert ; \
   ARGDN="/C=DE/O=VNC/OU=NoVNC/OU=Self-Signed-Certificate/CN=novnc.local" ; \
   openssl req -x509 -newkey rsa:4096 -keyout cert.key -out cert.pem -days 3650 -sha256 -nodes -subj "$ARGDN" ; \
-  htpasswd -bc /app/nginx/htpasswd ${BASIC_AUTH_USER:-novnc} ${BASIC_AUTH_PASS:-novnc}
+  htpasswd -bc /app/nginx/htpasswd ${BASIC_AUTH_USER:-novnc} ${BASIC_AUTH_PASS:-novnc} ; \
+  mkdir /root/Templates
+
+# try supervisor pip2
+RUN apt-get remove supervisor -y ; \
+  curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py ; \
+  python2 get-pip.py ; \
+  rm -f get-pip.py ; \
+  pip2 install supervisor ; \
+  pip2 install supervisor-stdout ; \
+  mkdir -p /var/log/supervisor ; \
+  for i in supervisorctl supervisord supervisor_stdout ; do ln -s /usr/local/bin/$i /usr/bin/ ; done
 
 COPY nzbget.conf /opt/momentum/.config/Momentum/nzbget.conf
 
@@ -133,6 +144,7 @@ ENV HOME=/root \
   LC_ALL=de_DE.UTF-8 \
   TIMEZONE=Europe/Berlin \
   TZ=Europe/Berlin \
+  DEBUG=0 \
   BASIC_AUTH_ENABLED=yes \
   BASIC_AUTH_USER=novnc \
   BASIC_AUTH_PASS=novnc \
@@ -146,7 +158,7 @@ ENV HOME=/root \
   RUN_SSH=yes \
   SMB_WORKGROUP=WORKGROUP \
   SMB_NETBIOS_NAME=WSDEBIAN \
-  SMB_SERVER_STRING="Samba %v im Debian Docker Container" 
+  SMB_SERVER_STRING="Samba %v im Docker Container" 
 
 # setup SSH
 RUN set -ex ; \
@@ -165,12 +177,11 @@ RUN set -ex ; \
 ## directory setup
 RUN set -ex ; \
   if [ ${BUILD_MOMENTUM:-0} -gt 0 2>/dev/null -o ${BUILD_SAMBA:-0} -gt 0 2>/dev/null ] ; then \
-    mkdir -p /opt/mediaserver/data/Filme \
-     /opt/mediaserver/data/Fotos \
-     /opt/mediaserver/data/Musik \
-     /opt/mediaserver/data/Serien \
-     /opt/mediaserver/data/Bücher && \
-     chown -R mms:mms /opt/mediaserver/ ; \
+    for xdir in Filme Fotos Musik Serien Bücher .homedrive ; do \
+      mkdir -p /opt/mediaserver/data/$xdir && touch /opt/mediaserver/data/$xdir/.lockdir ; \
+    done ; \
+    chown -R root:mms /opt/mediaserver/data ; \
+    chmod -R g+s /opt/mediaserver/data/ ; \
   fi
 
 ## setup momentum - https://momentum-client.com/#download
@@ -180,8 +191,9 @@ RUN set -ex ; \
     DEBIAN_FRONTEND=noninteractive apt-get update --allow-releaseinfo-change && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-broken libasound2 procps libgbm1 /app/momentum.deb && \
     rm -f /app/momentum.deb ; \
-    for i in Downloads nzb tmp ; do mkdir -p /opt/momentum/Momentum/$i ; done ; \
+    for i in Downloads nzb tmp ; do mkdir -p /opt/momentum/Momentum/$i && touch /opt/momentum/Momentum/$i/.lockdir ; done ; \
     chown -R mms:mms /opt/momentum/ ; \
+    chown -R root:mms /opt/momentum/Momentum/ ; \
     sed -i '/^Exec.*momentum-prod/d' /usr/share/applications/momentum-prod.desktop ; \
     echo 'Exec=env HOME=/opt/momentum /opt/Momentum/momentum-prod --no-sandbox' >> /usr/share/applications/momentum-prod.desktop ; \
     ln -s /usr/share/applications/momentum-prod.desktop /root/Desktop/ ; \
@@ -194,6 +206,9 @@ RUN set -ex ; \
 RUN set -ex ; \
   if [ ${BUILD_SAMBA:-0} -gt 0 2>/dev/null ] ; then \
     DEBIAN_FRONTEND=noninteractive apt-get install -y smbclient cifs-utils heimdal-clients samba --fix-broken ; \
+    useradd -m -s /sbin/nologin guest ; \
+    echo "alias smbpasswd='smbpasswd -c /app/samba/config/samba.conf'" >> /etc/skel/.bash_aliases ; \
+    cp /etc/skel/.bash_aliases /root/.bash_aliases ; \
   else \
     unset RUN_SAMBA ; \
   fi

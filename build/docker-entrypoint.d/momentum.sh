@@ -14,3 +14,14 @@ if [ -n "${RUN_MOMENTUM}" ] ; then
 else
   sed -i '/include.*momentum.conf/s/.*include/    #include/g' $CONFIG_DIR/samba.conf
 fi
+
+for xdir in Downloads nzb tmp ; do
+  tdir="/opt/momentum/Momentum/$xdir"
+  mkdir -p "$tdir" 2>/dev/null ||:
+  chmod 755 "$tdir" 2>/dev/null ||:
+  touch "$tdir"/.lockdir 2>/dev/null ||:
+  chown root:mms "$tdir" 2>/dev/null ||:
+  chown root:root "$tdir"/.lockdir 2>/dev/null ||:
+  chmod g+s "$tdir" 2>/dev/null ||:
+done
+

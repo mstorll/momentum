@@ -6,34 +6,35 @@ services:
     hostname: novnc
     container_name: momentum
     environment:
-      # Adjust Desktop (fluxbox, lxde) default: lxde
+      # yout Desktop (fluxbox, lxde) default: lxde
       RUN_DESKTOP: lxde
-      # Adjust to your screen size
+      #
+      # your screen size
       DISPLAY_WIDTH: 1600
       DISPLAY_HEIGHT: 1200
       #
-      # start Service
-      RUN_XTERM: no                 ## default: yes
-      RUN_SSH: yes                  ## default: yes
-      RUN_MOMENTUM: no              ## default: no
-      RUN_FIREFOX: no               ## default: no   
-      RUN_NGINX: yes                ## default: yes
-      RUN_SAMBA: yes                 ## default: no
-      RUN_VPNUNLIMIT: no            ## default: no
+      # autostart Service
+      RUN_XTERM: no                                       ## default: yes
+      RUN_SSH: yes                                        ## default: yes
+      RUN_MOMENTUM: no                                    ## default: no
+      RUN_FIREFOX: no                                     ## default: no   
+      RUN_NGINX: yes                                      ## default: yes
+      RUN_SAMBA: yes                                      ## default: no
+      RUN_VPNUNLIMIT: no                                  ## default: no
       #
       # novnx http basic auth
-      BASIC_AUTH_ENABLED: yes       ## default: yes
-      BASIC_AUTH_USER:    novnc     ## default: novnc
-      BASIC_AUTH_PASS:    novnc     ## default: novnc
+      BASIC_AUTH_ENABLED: yes                             ## default: yes
+      BASIC_AUTH_USER: novnc                              ## default: novnc
+      BASIC_AUTH_PASS: novnc                              ## default: novnc
       # 
       # vnc pass
-      VNC_PASSWORD:       novnc     ## default none
+      VNC_PASSWORD:       novnc                           ## default none
       #
       # samba
-      #SMB_WORKGROUP: WORKGROUP     ## default: WORKGROUP
-      #SMB_NETBIOS_NAME: WSDEBIAN   ## default: WSDEBIAN
-      #SMB_SERVER_STRING: "samba"   ## default: "Samba %v im Docker Container"
-      #SMB_OFFER_SHARE: no          ## default: no (offer public share)
+      #SMB_WORKGROUP: WORKGROUP                           ## default: WORKGROUP
+      #SMB_NETBIOS_NAME: WSDEBIAN                         ## default: WSDEBIAN
+      #SMB_SERVER_STRING: "Samba %v im Docker Container"  ## default: "Samba %v im Docker Container"
+      #SMB_OFFER_SHARE: yes                               ## default: no (offer public share)
 
     volumes:
       - 'conf:/app'

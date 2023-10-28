@@ -26,3 +26,14 @@ for xdir in Filme Fotos Musik Serien Bücher .homedrive ; do
   chown root:root "$tdir"/.lockdir 2>/dev/null ||:
   chmod g+s "$tdir" 2>/dev/null ||:
 done
+
+if [ "${SMB_OFFER_SHARE:-no}" = "yes" ] ; then
+  mkdir /opt/public_share 
+  touch /opt/public_share/.lockdir
+  chown root:mms /opt/public_share ; chown root:root /opt/public_share/.lockdir
+  chmod g+s /opt/public_share
+  sed -i '/include.*samba.public.conf/s/.*include.*/   include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
+else
+  rm -rf /opt/public_share
+  sed -i '/include.*samba.public.conf/s/.*include/\;  include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
+fi

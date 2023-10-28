@@ -33,9 +33,11 @@ services:
       #SMB_WORKGROUP: WORKGROUP     ## default: WORKGROUP
       #SMB_NETBIOS_NAME: WSDEBIAN   ## default: WSDEBIAN
       #SMB_SERVER_STRING: "samba"   ## default: "Samba %v im Docker Container"
+      #SMB_OFFER_SHARE: no          ## default: no (offer public share)
 
-#    volumes:
-#      - 'conf:/app'
+    volumes:
+      - 'conf:/app'
+      - 'work:/root'
     ports:
       ## vnc
       - 15900:5900/tcp

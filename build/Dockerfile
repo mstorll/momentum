@@ -1,4 +1,4 @@
-## DOCKERFILE +++++++++++++++++++++++++++++++++++++++++++++   27/10/2023
+## DOCKERFILE +++++++++++++++++++++++++++++++++++++++++++++   28/10/2023
 
 ARG BUILD_SSH=1
 ARG BUILD_MOMENTUM=1
@@ -158,7 +158,8 @@ ENV HOME=/root \
   RUN_SSH=yes \
   SMB_WORKGROUP=WORKGROUP \
   SMB_NETBIOS_NAME=WSDEBIAN \
-  SMB_SERVER_STRING="Samba %v im Docker Container" 
+  SMB_SERVER_STRING="Samba %v im Docker Container" \
+  SMB_OFFER_SHARE=no
 
 # setup SSH
 RUN set -ex ; \

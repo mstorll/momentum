@@ -24,7 +24,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get upgrade -y ; \
     mkdir -p "$xdir" && touch $xdir/es_funktioniert.txt ; chown -R ${USER1} "$xdir" && touch $xdir/.lockdir && chmod 400 $xdir/.lockdir ; \
   xdir="/opt/mediaserver/data/.homedrive/$(echo "${USER2}" | sed 's/./\U&/')" ; \
     mkdir -p "$xdir" && touch $xdir/es_funktioniert.txt ; chown -R ${USER1} "$xdir" && touch $xdir/.lockdir && chmod 400 $xdir/.lockdir ; \
-  sed -i '/^[[:blank:]*log level/s/log level.*/log level = 2  passdb:5 auth:5/g' /app/samba/config/samba.conf ; \
+  sed -i '/^[[:blank:]]*log level/s/log level.*/log level = 2  passdb:5 auth:5/g' /app/samba/config/samba.conf ; \
   usermod -u 21011970 marko ; \
   updatedb ; \
   apt clean

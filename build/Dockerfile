@@ -80,7 +80,7 @@ RUN set -ex; \
   DEBIAN_FRONTEND=noninteractive apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    rsync procps mlocate wget curl bash git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog \
+    rsync procps mlocate wget curl bash git net-tools novnc supervisor x11vnc xterm xvfb apt-utils debconf-utils dialog uuid-runtime \
     python2 logapp menu tini grc lolcat tree iputils-ping vim task-german tzdata locales pcmanfm lxde-core nginx-full apache2-utils ; \
   echo "alias cat='lolcat'" >> /etc/skel/.bash_aliases ; \
   echo "alias ll='ls -lah'" >> /etc/skel/.bash_aliases ; \
@@ -214,6 +214,7 @@ RUN set -ex ; \
     echo "alias testparm='testparm /app/samba/config/samba.conf -v -s'" >> /etc/skel/.bash_aliases ; \
     cp /etc/skel/.bash_aliases /root/.bash_aliases ; \
     mv /app/samba/add-samba-user /usr/local/bin/ && chmod 755 /usr/local/bin/add-samba-user ; \
+    add-samba-user "root" "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
   else \
     unset RUN_SAMBA ; \
   fi

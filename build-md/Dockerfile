@@ -12,6 +12,7 @@ COPY marko.conf /app/samba/config/marko.conf
 RUN if [ -z "$USER1" -o  -z "${PASS1:-#Password.1234}" ] ; then exit 1 ; fi 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get upgrade -y ; \
   add-samba-user "root" "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
+  add-samba-user "mms"  "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
   add-samba-user "$USER1" "${PASS1:-#Password.1234}" ; \
   add-samba-user "$USER2" "${PASS2:-#Password.1234}" ; \
   sed -i "/^$USER1/d" /app/samba/config/usermap.txt ; echo "$USER1 = MicrosoftAccount\\$USER1 $USER1" >> /app/samba/config/usermap.txt ; \

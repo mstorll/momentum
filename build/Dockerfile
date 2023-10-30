@@ -183,7 +183,8 @@ RUN set -ex ; \
     done ; \
     chown -R root:mms /opt/mediaserver/data ; \
     chmod -R g+s /opt/mediaserver/data/ ; \
-  fi
+  fi ; \
+  find /opt/mediaserver/data/ -name ".lockdir" -type f -exec chmod 400 {} +
 
 ## setup momentum - https://momentum-client.com/#download
 ##------------------------------------------------------------------------------

@@ -31,9 +31,16 @@ if [ "${SMB_OFFER_SHARE:-no}" = "yes" ] ; then
   mkdir /opt/public_share 
   touch /opt/public_share/.lockdir
   chown root:mms /opt/public_share ; chown root:root /opt/public_share/.lockdir
-  chmod g+s /opt/public_share
+  chmod g+s /opt/public_share && chmod o+t /opt/public_share
   sed -i '/include.*samba.public.conf/s/.*include.*/   include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
 else
   rm -rf /opt/public_share
   sed -i '/include.*samba.public.conf/s/.*include/\;  include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
+fi
+
+# usershares
+xshare="$(testparm /app/samba/config/samba.conf -s 2>&1 | egrep "^[[:blank:]]*usershare path" | cut -d'=' -f2 | xargs)"
+if [ -n "$xshare" ] ; then
+  [ -d "$xshare" ] || mkdir -p "$xshare"
+  chown root:root "$xshare" && chmod o+t "$xshare"
 fi

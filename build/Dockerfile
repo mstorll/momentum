@@ -208,8 +208,11 @@ RUN set -ex ; \
   if [ ${BUILD_SAMBA:-0} -gt 0 2>/dev/null ] ; then \
     DEBIAN_FRONTEND=noninteractive apt-get install -y smbclient cifs-utils heimdal-clients samba --fix-broken ; \
     useradd -m -s /sbin/nologin guest ; \
+    chmod o+t /app/samba/usershares ; \
     echo "alias smbpasswd='smbpasswd -c /app/samba/config/samba.conf'" >> /etc/skel/.bash_aliases ; \
+    echo "alias testparm='testparm /app/samba/config/samba.conf -v -s'" >> /etc/skel/.bash_aliases ; \
     cp /etc/skel/.bash_aliases /root/.bash_aliases ; \
+    mv /app/samba/add-samba-user /usr/local/bin/ && chmod 755 /usr/local/bin/add-samba-user ; \
   else \
     unset RUN_SAMBA ; \
   fi

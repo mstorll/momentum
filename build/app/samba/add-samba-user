@@ -1,0 +1,21 @@
+#!/bin/bash
+
+ARG_USERNAME="$1"
+ARG_PASSWORD="$2"
+[ -z "$ARG_PASSWORD" ] && echo "usage: $0 'username' 'passwort'" && exit 1
+
+## never change setting from sysuser (id < 1000)
+getent passwd "$ARG_USERNAME" >/dev/null
+if [ $? -eq 0 ] ; then
+  ## user exists
+  if [ $(id -u $ARG_USERNAME) -le 1000 ] ; then
+    echo "skip usermod settings for User: $ARG_USERNAME , ID: $(id -u $ARG_USERNAME)"
+  else
+    usermod -g sambashare -G mms -s /sbin/nologin "$ARG_USERNAME"
+  fi
+else
+  ## user add
+  useradd -g sambashare -G mms -s /sbin/nologin "$ARG_USERNAME"
+fi
+## add samba credentials
+echo -e "$ARG_PASSWORD\n$ARG_PASSWORD" | smbpasswd -c /app/samba/config/samba.conf -a -s "$ARG_USERNAME"

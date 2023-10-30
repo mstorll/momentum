@@ -35,7 +35,7 @@ if [ "${SMB_OFFER_SHARE:-no}" = "yes" ] ; then
   sed -i '/include.*samba.public.conf/s/.*include.*/   include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
 else
   rm -rf /opt/public_share
-  sed -i '/include.*samba.public.conf/s/.*include/\;  include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
+  sed -i '/include.*samba.public.conf/s/.*include.*/\;  include = \/app\/samba\/config\/samba.public.conf/g' /app/samba/config/samba.conf
 fi
 
 # usershares

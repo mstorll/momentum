@@ -53,6 +53,7 @@ ARG BUILD_SAMBA
 
 COPY --from=PREP /app/ /app/
 COPY --from=PREP /docker-entrypoint.d/ /docker-entrypoint.d/
+COPY vimrc /root/.vimrc
 
 ## run checks
 RUN set +x ; \
@@ -166,6 +167,7 @@ RUN set -ex ; \
   if [ ${BUILD_SSH:-0} -gt 0 2>/dev/null ] ; then \
     DEBIAN_FRONTEND=noninteractive apt-get install -y openssh-server openssh-client ; \
     ssh-keygen -A ; \
+    ssh-keygen -t rsa -q -f "/root/.ssh/id_rsa" -N "" ; \
     sed -i 's/#PidFile/PidFile/g' /etc/ssh/sshd_config ; \
     test ! -d /run/sshd && mkdir -p /run/sshd ; \
     echo 'd /var/run/sshd 0755 root root' > /usr/lib/tmpfiles.d/sshd.conf && \
@@ -175,17 +177,26 @@ RUN set -ex ; \
     rm -f /usr/lib/tmpfiles.d/sshd.conf /app/conf.d/sshd.conf /app/supervisor/conf.d/sshd* /docker-entrypoint.d/sshd* ; \
   fi
 
-## directory setup
+## directory setup (wenn samba oder momentum aktiviert ist zum bauen)
 RUN set -ex ; \
   if [ ${BUILD_MOMENTUM:-0} -gt 0 2>/dev/null -o ${BUILD_SAMBA:-0} -gt 0 2>/dev/null ] ; then \
     for xdir in Filme Fotos Musik Serien Bücher .homedrive ; do \
       mkdir -p /opt/mediaserver/data/$xdir && touch /opt/mediaserver/data/$xdir/.lockdir ; \
     done ; \
-    chown -R root:mms /opt/mediaserver/data ; \
-    chmod -R g+s /opt/mediaserver/data/ ; \
-  fi ; \
-  find /opt/mediaserver/data/ -name ".lockdir" -type f -exec chmod 400 {} +
+    if [ ${BUILD_MOMENTUM:-0} -gt 0 2>/dev/null ] ; then \
+      mkdir -p /opt/mediaserver/data/.homedrive/momentum ; \
+      touch /opt/mediaserver/data/.homedrive/momentum/.lockdir ; \
+    fi ; \
+    chown -R mms:mms /opt/mediaserver/data ; \
+    touch /opt/mediaserver/data/.lockdir ; \
+    find /opt/mediaserver/data/ -mindepth 1 -type d -exec chmod 775 {} + ; \
+    find /opt/mediaserver/data/ -mindepth 1 -type d -exec chmod g+s {} + ; \
+    find /opt/mediaserver/data/ -mindepth 1 -name ".lockdir" -type f -exec chmod 400 {} + ; \
+    chmod 755 /opt/mediaserver/data/.homedrive/ ; \
+    chown root:mms /opt/mediaserver/data/.homedrive ; \
+  fi
 
+##------------------------------------------------------------------------------
 ## setup momentum - https://momentum-client.com/#download
 ##------------------------------------------------------------------------------
 RUN set -ex ; \
@@ -193,9 +204,15 @@ RUN set -ex ; \
     DEBIAN_FRONTEND=noninteractive apt-get update --allow-releaseinfo-change && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-broken libasound2 procps libgbm1 /app/momentum.deb && \
     rm -f /app/momentum.deb ; \
-    for i in Downloads nzb tmp ; do mkdir -p /opt/momentum/Momentum/$i && touch /opt/momentum/Momentum/$i/.lockdir ; done ; \
-    chown -R mms:mms /opt/momentum/ ; \
-    chown -R root:mms /opt/momentum/Momentum/ ; \
+    for i in Downloads nzb tmp Intermediate ; do \
+      for z in /opt/momentum/Momentum /opt/mediaserver/data/.homedrive/momentum ; do \
+        tdir="$z/$i" ; mkdir -p "$tdir" && touch "$tdir"/.lockdir && chown -R mms:mms "$tdir" && \
+          chmod 775 "$tdir" && chmod g+s "$tdir" && \
+          chmod 400 "$tdir"/.lockdir && chown root:root "$tdir"/.lockdir ; \
+      done ; \
+    done ; \
+    chmod 755 /opt/mediaserver/data/.homedrive/ ; \
+    chown root:mms /opt/mediaserver/data/.homedrive ; \
     sed -i '/^Exec.*momentum-prod/d' /usr/share/applications/momentum-prod.desktop ; \
     echo 'Exec=env HOME=/opt/momentum /opt/Momentum/momentum-prod --no-sandbox' >> /usr/share/applications/momentum-prod.desktop ; \
     ln -s /usr/share/applications/momentum-prod.desktop /root/Desktop/ ; \
@@ -203,22 +220,28 @@ RUN set -ex ; \
     unset RUN_MOMENTUM ; \
   fi
 
+##------------------------------------------------------------------------------
 ## setup samba
 ##------------------------------------------------------------------------------
 RUN set -ex ; \
   if [ ${BUILD_SAMBA:-0} -gt 0 2>/dev/null ] ; then \
     DEBIAN_FRONTEND=noninteractive apt-get install -y smbclient cifs-utils heimdal-clients samba --fix-broken ; \
-    useradd -m -s /sbin/nologin guest ; \
     chmod o+t /app/samba/usershares ; \
     echo "alias smbpasswd='smbpasswd -c /app/samba/config/samba.conf'" >> /etc/skel/.bash_aliases ; \
     echo "alias testparm='testparm /app/samba/config/samba.conf -v -s'" >> /etc/skel/.bash_aliases ; \
+    echo "alias pdbedit='pdbedit -s /app/samba/config/samba.conf --verbose'" >> /etc/skel/.bash_aliases ; \
     cp /etc/skel/.bash_aliases /root/.bash_aliases ; \
     mv /app/samba/add-samba-user /usr/local/bin/ && chmod 755 /usr/local/bin/add-samba-user ; \
     add-samba-user "root" "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
+    add-samba-user "mms"  "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
+    add-samba-user "guest" "$(cat /dev/urandom | tr -cd "a-zA-Z0-9" | head -c 32)" ; \
+    mv /etc/samba/smb.conf /etc/samba/smb.conf.orig && ln -s --force /app/samba/config/samba.conf /etc/samba/smb.conf ; \
+    pdbedit -s /app/samba/config/samba.conf --list && sleep 5 ; \
   else \
     unset RUN_SAMBA ; \
   fi
 
+##------------------------------------------------------------------------------
 ## setup firefox
 ##------------------------------------------------------------------------------
 RUN set -ex ; \
@@ -232,6 +255,7 @@ RUN set -ex ; \
     unset RUN_FIREFOX ; \
   fi
 
+##------------------------------------------------------------------------------
 ## setup vpn-unlimited
 ##------------------------------------------------------------------------------
 RUN set -ex ; \
@@ -247,6 +271,7 @@ RUN set -ex ; \
     unset RUN_VPNUNLIMIT ; \
   fi
 
+##------------------------------------------------------------------------------
 ## atleast
 ##------------------------------------------------------------------------------
 RUN DEBIAN_FRONTEND=noninteractive apt --fix-broken install -y && \

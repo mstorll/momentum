@@ -39,6 +39,7 @@ services:
     volumes:
       - 'conf:/app'
       - 'work:/root'
+      - 'entrypoint:/docker-entrypoint.d'
     ports:
       ## vnc
       - 15900:5900/tcp
@@ -59,6 +60,7 @@ services:
 volumes:
   work:
   conf:
+  entrypoint:
 
 networks:
   novnc:
